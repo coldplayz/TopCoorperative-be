@@ -14,3 +14,45 @@ export const UserRoles = {
   ADMIN: 'admin',
   USER: 'user',
 };
+
+// Permissions for different categories of actors (users).
+// Extra logic could be applied before op action is taken. E.g.,
+// ...a req can only be deleted if it's not been approved yet;
+// ...or a loan can be read by a user/actor only if it's theirs.
+export const RequestResourceRBAC = {
+  permissions: {
+    createOwnRequest: [UserRoles.USER, UserRoles.ADMIN],
+    readOwnRequests: [UserRoles.USER, UserRoles.ADMIN],
+    readAllRequests: [UserRoles.ADMIN],
+    editOwnRequest: [UserRoles.USER, UserRoles.ADMIN],
+    editAnyRequest: [UserRoles.ADMIN],
+    deleteOwnRequest: [UserRoles.USER, UserRoles.ADMIN],
+    deleteAnyRequest: [UserRoles.ADMIN],
+    approveAnyRequest: [UserRoles.ADMIN],
+    declineAnyRequest: [UserRoles.ADMIN],
+  },
+};
+
+export const LoanResourceRBAC = {
+  permissions: {
+    createOwnLoan: [],
+    readOwnLoans: [UserRoles.USER, UserRoles.ADMIN],
+    readAllLoans: [UserRoles.ADMIN],
+    editOwnLoan: [UserRoles.USER, UserRoles.ADMIN],
+    editAnyLoan: [UserRoles.ADMIN],
+    deleteOwnLoan: [],
+    deleteAnyLoan: [],
+  },
+};
+
+export const UserResourceRBAC = {
+  permissions: {
+    createOwnUserAccount: [UserRoles.USER, UserRoles.ADMIN],
+    readOwnUserAccount: [UserRoles.USER, UserRoles.ADMIN],
+    readAllUserAccounts: [UserRoles.ADMIN],
+    editOwnUserAccount: [UserRoles.USER, UserRoles.ADMIN],
+    editAnyUserAccount: [UserRoles.ADMIN],
+    deleteOwnUserAccount: [UserRoles.USER, UserRoles.ADMIN],
+    deleteAnyUserAccount: [UserRoles.ADMIN],
+  },
+};
