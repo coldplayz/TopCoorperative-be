@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from "express";
 import {
   LoanResourceRBAC,
   RequestResourceRBAC,
+  UserResourceRBAC,
 } from "@/lib/config";
 import { AuthenticatedRequest } from "@/types";
 
@@ -417,3 +418,204 @@ export async function verifyDeleteLoanAuthz(
 }
 
 // ======= Users =======
+
+/**
+ * Ensures that for this resource (own or not),
+ * ...the user has adequate permissions to access.
+ *
+ * Algorithm:
+ * 1. check if accessing own resources, or not
+ * 2. check if permitted to access resource
+ */
+export async function verifyReadUsersAuthz(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  const role = req.user.role;
+  const tknUserId = req.user.id;
+  // query-specified ID takes precedence
+  const reqUserId = req.query?.userId || tknUserId;
+
+  if (tknUserId !== reqUserId) {
+    // check if allowed to  access any resource
+    if (UserResourceRBAC.permissions.readAllUserAccounts.includes(role)) {
+      // permitted; likely admin.
+      return next();
+    }
+
+    // Not own resource, and not permitted to access just any.
+    return res.status(403).json({
+      success: false,
+      error: 'Unauthorized',
+    });
+  }
+
+  // Wants to access own resource
+  if (UserResourceRBAC.permissions.readOwnUserAccount.includes(role)) return next();
+
+  return res.status(403).json({
+    success: false,
+    error: 'Unauthorized',
+  });
+}
+
+/**
+ * Ensures that for this resource (own or not),
+ * ...the user has adequate permissions to access.
+ *
+ * Algorithm:
+ * 1. check if accessing own resources, or not
+ * 2. check if permitted to access resource
+ */
+export async function verifyReadUserAuthz(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  const role = req.user.role;
+  const tknUserId = req.user.id;
+  const reqUserId = req.params?.id || tknUserId;
+
+  if (tknUserId !== reqUserId) {
+    // check if allowed to access any resource
+    if (UserResourceRBAC.permissions.readAnyUserAccount.includes(role)) {
+      // permitted; likely admin.
+      return next();
+    }
+
+    // Not own resource, and not permitted to access just any.
+    return res.status(403).json({
+      success: false,
+      error: 'Unauthorized',
+    });
+  }
+
+  // Wants to access own resource
+  if (UserResourceRBAC.permissions.readOwnUserAccount.includes(role)) return next();
+
+  return res.status(403).json({
+    success: false,
+    error: 'Unauthorized',
+  });
+}
+
+/**
+ * Ensures that for this resource (own or not),
+ * ...the user has adequate permissions to access.
+ *
+ * Algorithm:
+ * 1. check if accessing own resources, or not
+ * 2. check if permitted to access resource
+ */
+export async function verifyCreateUserAuthz(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  const role = req.user.role;
+  const tknUserId = req.user.id;
+  const reqUserId = req.query?.userId || tknUserId;
+
+  if (tknUserId !== reqUserId) {
+    // check if allowed to access any resource
+    if (UserResourceRBAC.permissions.createAnyUserAccount.includes(role)) {
+      // permitted; likely admin.
+      return next();
+    }
+
+    // Not own resource, and not permitted to access just any.
+    return res.status(403).json({
+      success: false,
+      error: 'Unauthorized',
+    });
+  }
+
+  // Wants to access own resource
+  if (UserResourceRBAC.permissions.createOwnUserAccount.includes(role)) return next();
+
+  return res.status(403).json({
+    success: false,
+    error: 'Unauthorized',
+  });
+}
+
+/**
+ * Ensures that for this resource (own or not),
+ * ...the user has adequate permissions to access.
+ *
+ * Algorithm:
+ * 1. check if accessing own resources, or not
+ * 2. check if permitted to access resource
+ */
+export async function verifyEditUserAuthz(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  const role = req.user.role;
+  const tknUserId = req.user.id;
+  const reqUserId = req.params?.id || tknUserId;
+
+  if (tknUserId !== reqUserId) {
+    // check if allowed to  access any resource
+    if (UserResourceRBAC.permissions.editAnyUserAccount.includes(role)) {
+      // permitted; likely admin.
+      return next();
+    }
+
+    // Not own resource, and not permitted to access just any.
+    return res.status(403).json({
+      success: false,
+      error: 'Unauthorized',
+    });
+  }
+
+  // Wants to access own resource
+  if (UserResourceRBAC.permissions.editOwnUserAccount.includes(role)) return next();
+
+  return res.status(403).json({
+    success: false,
+    error: 'Unauthorized',
+  });
+}
+
+/**
+ * Ensures that for this resource (own or not),
+ * ...the user has adequate permissions to access.
+ *
+ * Algorithm:
+ * 1. check if accessing own resources, or not
+ * 2. check if permitted to access resource
+ */
+export async function verifyDeleteUserAuthz(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  const role = req.user.role;
+  const tknUserId = req.user.id;
+  const reqUserId = req.params?.id || tknUserId;
+
+  if (tknUserId !== reqUserId) {
+    // check if allowed to  access any resource
+    if (UserResourceRBAC.permissions.deleteAnyUserAccount.includes(role)) {
+      // permitted; likely admin.
+      return next();
+    }
+
+    // Not own resource, and not permitted to access just any.
+    return res.status(403).json({
+      success: false,
+      error: 'Unauthorized',
+    });
+  }
+
+  // Wants to access own resource
+  if (UserResourceRBAC.permissions.deleteOwnUserAccount.includes(role)) return next();
+
+  return res.status(403).json({
+    success: false,
+    error: 'Unauthorized',
+  });
+}
