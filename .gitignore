@@ -1,0 +1,5 @@
+**/*.env.*
+node_modules
+.gb-backups
+test.js
+todos.yaml
