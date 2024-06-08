@@ -1,3 +1,5 @@
+import * as AuthZ from "@/src/middlewares/authz-middleware";
+
 export const DATABASE_URI = process.env.DATABASE_URI || 'mongodb://localhost:3456/';
 export const DATABASE_NAME = 'top-coorperative';
 
@@ -14,6 +16,59 @@ export const UserRoles = {
   ADMIN: 'admin',
   USER: 'user',
 };
+
+export const Routes = {
+  auth: {
+    signin: '/signin',
+    signout: '/signout',
+    refreshToken: 'refresh-token',
+  },
+  user: {
+    getUsers: '/',
+    getUserById: '/:id',
+    createUser: '/',
+    editUserById: '/:id',
+    deleteUserById: ':id',
+  },
+  loan: {
+    getLoans: '/',
+    getLoanById: '/:id',
+    createLoan: '/',
+    editLoanById: '/:id',
+    deleteLoanById: ':id',
+  },
+  request: {
+    getRequests: '/',
+    getRequestById: '/:id',
+    createRequest: '/',
+    editRequestById: '/:id',
+    deleteRequestById: ':id',
+  },
+};
+
+export const routeAuthzMap = new Map();
+const routeAuthzVector = [
+  // loans
+  [Routes.loan.createLoan, AuthZ.verifyCreateLoanAuthz],
+  [Routes.loan.deleteLoanById, AuthZ.verifyDeleteLoanAuthz],
+  [Routes.loan.editLoanById, AuthZ.verifyEditLoanAuthz],
+  [Routes.loan.getLoanById, AuthZ.verifyReadLoanAuthz],
+  [Routes.loan.getLoans, AuthZ.verifyReadLoansAuthz],
+  // requests
+  [Routes.request.createRequest, AuthZ.verifyCreateRequestAuthz],
+  [Routes.request.deleteRequestById, AuthZ.verifyDeleteRequestAuthz],
+  [Routes.request.editRequestById, AuthZ.verifyEditRequestAuthz],
+  [Routes.request.getRequestById, AuthZ.verifyReadRequestAuthz],
+  [Routes.request.getRequests, AuthZ.verifyReadRequestsAuthz],
+  // users
+  [Routes.user.createUser, AuthZ.verifyCreateUserAuthz],
+  [Routes.user.deleteUserById, AuthZ.verifyDeleteUserAuthz],
+  [Routes.user.editUserById, AuthZ.verifyEditUserAuthz],
+  [Routes.user.getUserById, AuthZ.verifyReadUserAuthz],
+  [Routes.user.getUsers, AuthZ.verifyReadUsersAuthz],
+];
+
+routeAuthzVector.forEach(([route, authz]) => routeAuthzMap.set(route, authz));
 
 // Permissions for different categories of actors (users).
 // Extra logic could be applied before op action is taken. E.g.,
