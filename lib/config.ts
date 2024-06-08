@@ -19,30 +19,30 @@ export const UserRoles = {
 
 export const Routes = {
   auth: {
-    signin: '/signin',
-    signout: '/signout',
-    refreshToken: 'refresh-token',
+    signin: { path: '/signin' },
+    signout: { path: '/signout' },
+    refreshToken: { path: 'refresh-token' },
   },
   user: {
-    getUsers: '/',
-    getUserById: '/:id',
-    createUser: '/',
-    editUserById: '/:id',
-    deleteUserById: ':id',
+    getUsers: { path: '/' },
+    getUserById: { path: '/:id' },
+    createUser: { path: '/' },
+    editUserById: { path: '/:id' },
+    deleteUserById: { path: ':id' },
   },
   loan: {
-    getLoans: '/',
-    getLoanById: '/:id',
-    createLoan: '/',
-    editLoanById: '/:id',
-    deleteLoanById: ':id',
+    getLoans: { path: '/' },
+    getLoanById: { path: '/:id' },
+    createLoan: { path: '/' },
+    editLoanById: { path: '/:id' },
+    deleteLoanById: { path: ':id' },
   },
   request: {
-    getRequests: '/',
-    getRequestById: '/:id',
-    createRequest: '/',
-    editRequestById: '/:id',
-    deleteRequestById: ':id',
+    getRequests: { path: '/' },
+    getRequestById: { path: '/:id' },
+    createRequest: { path: '/' },
+    editRequestById: { path: '/:id' },
+    deleteRequestById: { path: ':id' },
   },
 };
 
