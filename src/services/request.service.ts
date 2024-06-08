@@ -21,6 +21,8 @@ export async function getRequests(queryObj: RequestQueryDTO) {
   return Request.find(queryObj);
 }
 
+// export async function getAllRequests(queryObj: RequestQueryDTO  ) {}
+
 export async function getRequestById(id: string) {
   return Request.findById(id);
 }
@@ -31,6 +33,8 @@ export async function createRequest(requestData: RequestCreateDTO) {
 
   return newRequest;
 }
+
+// export async function createAnyRequest(requestData: RequestCreateDTO) {}
 
 export async function editRequestById(id: string, updateObj: RequestUpdateDTO) {
   const existingRequest = await Request.findById(id);
@@ -43,12 +47,6 @@ export async function editRequestById(id: string, updateObj: RequestUpdateDTO) {
   const updatedRequest = updateLoanReq(existingRequest, updateObj);
 
   // console.log(id, updateObj); // SCAFF
-
-  /*
-  Object.entries(updateObj).forEach(([k, v]) => {
-    existingRequest[k] = v;
-  });
-  */
 
   await updatedRequest.save();
 

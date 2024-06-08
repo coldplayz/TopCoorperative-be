@@ -22,8 +22,11 @@ export const UserRoles = {
 export const RequestResourceRBAC = {
   permissions: {
     createOwnRequest: [UserRoles.USER, UserRoles.ADMIN],
+    createAnyRequest: [''],
     readOwnRequests: [UserRoles.USER, UserRoles.ADMIN],
+    readOwnRequest: [UserRoles.USER, UserRoles.ADMIN],
     readAllRequests: [UserRoles.ADMIN],
+    readAnyRequest: [UserRoles.ADMIN],
     editOwnRequest: [UserRoles.USER, UserRoles.ADMIN],
     editAnyRequest: [UserRoles.ADMIN],
     deleteOwnRequest: [UserRoles.USER, UserRoles.ADMIN],
@@ -35,21 +38,26 @@ export const RequestResourceRBAC = {
 
 export const LoanResourceRBAC = {
   permissions: {
-    createOwnLoan: [],
+    createOwnLoan: [''],
+    createAnyLoan: [''],
     readOwnLoans: [UserRoles.USER, UserRoles.ADMIN],
+    readOwnLoan: [UserRoles.USER, UserRoles.ADMIN],
     readAllLoans: [UserRoles.ADMIN],
+    readAnyLoan: [UserRoles.ADMIN],
     editOwnLoan: [UserRoles.USER, UserRoles.ADMIN],
     editAnyLoan: [UserRoles.ADMIN],
-    deleteOwnLoan: [],
-    deleteAnyLoan: [],
+    deleteOwnLoan: [''],
+    deleteAnyLoan: [''],
   },
 };
 
 export const UserResourceRBAC = {
   permissions: {
     createOwnUserAccount: [UserRoles.USER, UserRoles.ADMIN],
+    createAnyUserAccount: [''],
     readOwnUserAccount: [UserRoles.USER, UserRoles.ADMIN],
     readAllUserAccounts: [UserRoles.ADMIN],
+    readAnyUserAccount: [UserRoles.ADMIN],
     editOwnUserAccount: [UserRoles.USER, UserRoles.ADMIN],
     editAnyUserAccount: [UserRoles.ADMIN],
     deleteOwnUserAccount: [UserRoles.USER, UserRoles.ADMIN],
