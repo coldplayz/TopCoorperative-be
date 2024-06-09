@@ -31,6 +31,7 @@ export async function verifyReadRequestsAuthz(
     // check if allowed to  access any resource
     if (RequestResourceRBAC.permissions.readAllRequests.includes(role)) {
       // permitted; likely admin.
+      req.user.permissions.canReadAll = true;
       return next();
     }
 
@@ -42,7 +43,10 @@ export async function verifyReadRequestsAuthz(
   }
 
   // Wants to access own resource
-  if (RequestResourceRBAC.permissions.readOwnRequests.includes(role)) return next();
+  if (RequestResourceRBAC.permissions.readOwnRequests.includes(role)) {
+    req.user.permissions.canReadOwn = true;
+    return next();
+  }
 
   return res.status(403).json({
     success: false,
@@ -71,6 +75,7 @@ export async function verifyReadRequestAuthz(
     // check if allowed to  access any resource
     if (RequestResourceRBAC.permissions.readAnyRequest.includes(role)) {
       // permitted; likely admin.
+      req.user.permissions.canReadAny = true;
       return next();
     }
 
@@ -82,7 +87,10 @@ export async function verifyReadRequestAuthz(
   }
 
   // Wants to access own resource
-  if (RequestResourceRBAC.permissions.readOwnRequest.includes(role)) return next();
+  if (RequestResourceRBAC.permissions.readOwnRequest.includes(role)) {
+    req.user.permissions.canReadOwn = true;
+    return next();
+  }
 
   return res.status(403).json({
     success: false,
@@ -111,6 +119,7 @@ export async function verifyCreateRequestAuthz(
     // check if allowed to access any resource
     if (RequestResourceRBAC.permissions.createAnyRequest.includes(role)) {
       // permitted; likely admin.
+      req.user.permissions.canCreateAny = true;
       return next();
     }
 
@@ -122,7 +131,10 @@ export async function verifyCreateRequestAuthz(
   }
 
   // Wants to access own resource
-  if (RequestResourceRBAC.permissions.createOwnRequest.includes(role)) return next();
+  if (RequestResourceRBAC.permissions.createOwnRequest.includes(role)) {
+    req.user.permissions.canCreateOwn = true;
+    return next();
+  }
 
   return res.status(403).json({
     success: false,
@@ -152,6 +164,7 @@ export async function verifyEditRequestAuthz(
     // check if allowed to  access any resource
     if (RequestResourceRBAC.permissions.editAnyRequest.includes(role)) {
       // permitted; likely admin.
+      req.user.permissions.canEditAny = true;
       return next();
     }
 
@@ -163,7 +176,10 @@ export async function verifyEditRequestAuthz(
   }
 
   // Wants to access own resource
-  if (RequestResourceRBAC.permissions.editOwnRequest.includes(role)) return next();
+  if (RequestResourceRBAC.permissions.editOwnRequest.includes(role)) {
+    req.user.permissions.canEditOwn = true;
+    return next();
+  }
 
   return res.status(403).json({
     success: false,
@@ -193,6 +209,7 @@ export async function verifyDeleteRequestAuthz(
     // check if allowed to  access any resource
     if (RequestResourceRBAC.permissions.deleteAnyRequest.includes(role)) {
       // permitted; likely admin.
+      req.user.permissions.canDeleteAny = true;
       return next();
     }
 
@@ -204,7 +221,10 @@ export async function verifyDeleteRequestAuthz(
   }
 
   // Wants to access own resource
-  if (RequestResourceRBAC.permissions.deleteOwnRequest.includes(role)) return next();
+  if (RequestResourceRBAC.permissions.deleteOwnRequest.includes(role)) {
+    req.user.permissions.canDeleteOwn = true;
+    return next();
+  }
 
   return res.status(403).json({
     success: false,
@@ -236,6 +256,7 @@ export async function verifyReadLoansAuthz(
     // check if allowed to  access any resource
     if (LoanResourceRBAC.permissions.readAllLoans.includes(role)) {
       // permitted; likely admin.
+      req.user.permissions.canReadAll = true;
       return next();
     }
 
@@ -247,7 +268,10 @@ export async function verifyReadLoansAuthz(
   }
 
   // Wants to access own resource
-  if (LoanResourceRBAC.permissions.readOwnLoans.includes(role)) return next();
+  if (LoanResourceRBAC.permissions.readOwnLoans.includes(role)) {
+    req.user.permissions.canReadOwn = true;
+    return next();
+  }
 
   return res.status(403).json({
     success: false,
@@ -276,6 +300,7 @@ export async function verifyReadLoanAuthz(
     // check if allowed to access any resource
     if (LoanResourceRBAC.permissions.readAnyLoan.includes(role)) {
       // permitted; likely admin.
+      req.user.permissions.canReadAny = true;
       return next();
     }
 
@@ -287,7 +312,10 @@ export async function verifyReadLoanAuthz(
   }
 
   // Wants to access own resource
-  if (LoanResourceRBAC.permissions.readOwnLoan.includes(role)) return next();
+  if (LoanResourceRBAC.permissions.readOwnLoan.includes(role)) {
+    req.user.permissions.canReadOwn = true;
+    return next();
+  }
 
   return res.status(403).json({
     success: false,
@@ -316,6 +344,7 @@ export async function verifyCreateLoanAuthz(
     // check if allowed to access any resource
     if (LoanResourceRBAC.permissions.createAnyLoan.includes(role)) {
       // permitted; likely admin.
+      req.user.permissions.canCreateAny = true;
       return next();
     }
 
@@ -327,7 +356,10 @@ export async function verifyCreateLoanAuthz(
   }
 
   // Wants to access own resource
-  if (LoanResourceRBAC.permissions.createOwnLoan.includes(role)) return next();
+  if (LoanResourceRBAC.permissions.createOwnLoan.includes(role)) {
+    req.user.permissions.canCreateOwn = true;
+    return next();
+  }
 
   return res.status(403).json({
     success: false,
@@ -357,6 +389,7 @@ export async function verifyEditLoanAuthz(
     // check if allowed to  access any resource
     if (LoanResourceRBAC.permissions.editAnyLoan.includes(role)) {
       // permitted; likely admin.
+      req.user.permissions.canEditAny = true;
       return next();
     }
 
@@ -368,7 +401,10 @@ export async function verifyEditLoanAuthz(
   }
 
   // Wants to access own resource
-  if (LoanResourceRBAC.permissions.editOwnLoan.includes(role)) return next();
+  if (LoanResourceRBAC.permissions.editOwnLoan.includes(role)) {
+    req.user.permissions.canEditOwn = true;
+    return next();
+  }
 
   return res.status(403).json({
     success: false,
@@ -398,6 +434,7 @@ export async function verifyDeleteLoanAuthz(
     // check if allowed to  access any resource
     if (LoanResourceRBAC.permissions.deleteAnyLoan.includes(role)) {
       // permitted; likely admin.
+      req.user.permissions.canDeleteAny = true;
       return next();
     }
 
@@ -409,7 +446,10 @@ export async function verifyDeleteLoanAuthz(
   }
 
   // Wants to access own resource
-  if (LoanResourceRBAC.permissions.deleteOwnLoan.includes(role)) return next();
+  if (LoanResourceRBAC.permissions.deleteOwnLoan.includes(role)) {
+    req.user.permissions.canDeleteOwn = true;
+    return next();
+  }
 
   return res.status(403).json({
     success: false,
@@ -441,6 +481,7 @@ export async function verifyReadUsersAuthz(
     // check if allowed to  access any resource
     if (UserResourceRBAC.permissions.readAllUserAccounts.includes(role)) {
       // permitted; likely admin.
+      req.user.permissions.canReadAll = true;
       return next();
     }
 
@@ -452,7 +493,10 @@ export async function verifyReadUsersAuthz(
   }
 
   // Wants to access own resource
-  if (UserResourceRBAC.permissions.readOwnUserAccount.includes(role)) return next();
+  if (UserResourceRBAC.permissions.readOwnUserAccount.includes(role)) {
+    req.user.permissions.canReadOwn = true;
+    return next();
+  }
 
   return res.status(403).json({
     success: false,
@@ -481,6 +525,7 @@ export async function verifyReadUserAuthz(
     // check if allowed to access any resource
     if (UserResourceRBAC.permissions.readAnyUserAccount.includes(role)) {
       // permitted; likely admin.
+      req.user.permissions.canReadAny = true;
       return next();
     }
 
@@ -492,7 +537,10 @@ export async function verifyReadUserAuthz(
   }
 
   // Wants to access own resource
-  if (UserResourceRBAC.permissions.readOwnUserAccount.includes(role)) return next();
+  if (UserResourceRBAC.permissions.readOwnUserAccount.includes(role)) {
+    req.user.permissions.canReadOwn = true;
+    return next();
+  }
 
   return res.status(403).json({
     success: false,
@@ -521,6 +569,7 @@ export async function verifyCreateUserAuthz(
     // check if allowed to access any resource
     if (UserResourceRBAC.permissions.createAnyUserAccount.includes(role)) {
       // permitted; likely admin.
+      req.user.permissions.canCreateAny = true;
       return next();
     }
 
@@ -532,7 +581,10 @@ export async function verifyCreateUserAuthz(
   }
 
   // Wants to access own resource
-  if (UserResourceRBAC.permissions.createOwnUserAccount.includes(role)) return next();
+  if (UserResourceRBAC.permissions.createOwnUserAccount.includes(role)) {
+    req.user.permissions.canCreateOwn = true;
+    return next();
+  }
 
   return res.status(403).json({
     success: false,
@@ -561,6 +613,7 @@ export async function verifyEditUserAuthz(
     // check if allowed to  access any resource
     if (UserResourceRBAC.permissions.editAnyUserAccount.includes(role)) {
       // permitted; likely admin.
+      req.user.permissions.canEditAny = true;
       return next();
     }
 
@@ -572,7 +625,10 @@ export async function verifyEditUserAuthz(
   }
 
   // Wants to access own resource
-  if (UserResourceRBAC.permissions.editOwnUserAccount.includes(role)) return next();
+  if (UserResourceRBAC.permissions.editOwnUserAccount.includes(role)) {
+    req.user.permissions.canEditOwn = true;
+    return next();
+  }
 
   return res.status(403).json({
     success: false,
@@ -601,6 +657,7 @@ export async function verifyDeleteUserAuthz(
     // check if allowed to  access any resource
     if (UserResourceRBAC.permissions.deleteAnyUserAccount.includes(role)) {
       // permitted; likely admin.
+      req.user.permissions.canDeleteAny = true;
       return next();
     }
 
@@ -612,7 +669,10 @@ export async function verifyDeleteUserAuthz(
   }
 
   // Wants to access own resource
-  if (UserResourceRBAC.permissions.deleteOwnUserAccount.includes(role)) return next();
+  if (UserResourceRBAC.permissions.deleteOwnUserAccount.includes(role)) {
+    req.user.permissions.canDeleteOwn = true;
+    return next();
+  }
 
   return res.status(403).json({
     success: false,
