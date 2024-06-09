@@ -11,7 +11,20 @@ import { HydratedDocument, Model, Types } from "mongoose";
 import jwt from "jsonwebtoken";
 import { Request } from "express";
 
-type AuthenticatedRequest = Request & { user: DecodedAccessToken };
+type RequestUser = DecodedAccessToken & {
+  permissions: {
+    canCreateOwn?: boolean;
+    canCreateAny?: boolean;
+    canReadOwn?: boolean;
+    canReadAny?: boolean;
+    canReadAll?: boolean;
+    canEditOwn?: boolean;
+    canEditAny?: boolean;
+    canDeleteOwn?: boolean;
+    canDeleteAny?: boolean;
+  }
+};
+type AuthenticatedRequest = Request & { user: RequestUser };
 
 // ======= Users =======
 

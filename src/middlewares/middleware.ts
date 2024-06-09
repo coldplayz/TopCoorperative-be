@@ -8,7 +8,7 @@ import { TEST_SECRET } from "@/lib/config";
 import { Request, Response, NextFunction } from "express";
 
 import User from "@/src/models/user.model";
-import { DecodedAccessToken, UserDoc } from "@/types";
+import { DecodedAccessToken, RequestUser, UserDoc } from "@/types";
 
 export const loginValidator = [
     body("email")
@@ -83,7 +83,13 @@ export const verifyJWT = async (
     }
 
     // Attach user info to the request for further use
-    req.user = user;
+    const reqUser = {
+      id: user._id,
+      email: user.email,
+      role: user.role,
+      permissions: {},
+    };
+    req.user = reqUser;
     next();
   } catch (err: any) {
     if (err.name === 'JsonWebTokenError') {
