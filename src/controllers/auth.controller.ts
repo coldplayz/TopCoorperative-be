@@ -10,14 +10,13 @@ import { Request, Response, NextFunction } from "express";
 import { validationResult } from "express-validator";
 
 import * as authService from "@/src/services/auth.service";
-import userUC from "../use-cases/user";
 import eventEmitter from "../events/api-events";
-import { RequestUser } from "@/types";
+import { AuthenticatedRequest } from "@/types";
 
 // TODO:
 // - see about decoupling controller from data service; perhaps
 //   moving dependency injection to the main entry point - index.ts
-// - see about integrating auth core business rules
+// - see about integrating auth  with core business rules
 // - data validation
 // - data formatting
 // - uniform response object format
@@ -43,7 +42,7 @@ export async function loginUser(req: Request, res: Response, next: NextFunction)
 
     // Set options for cookies
     const options = {
-      httpOnly: true,
+      httpOnly: true, // No access on the client, only server
       secure: true, // Enable in a production environment with HTTPS
     };
 
@@ -68,7 +67,7 @@ export async function loginUser(req: Request, res: Response, next: NextFunction)
 }
 
 export async function logoutUser(
-  req: Request & { user?: RequestUser },
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ) {
@@ -95,7 +94,7 @@ export async function logoutUser(
       .status(200)
       .clearCookie("accessToken", options)
       .clearCookie("refreshToken", options)
-      .json({ user: {}, message: "Logged out successfully" });
+      .json({ sucess: true, data: "Logged out successfully" });
     eventEmitter.emit('logoutUser', { data: 'Logout successfull!' });
   } catch (err: any) {
     if (err.name === 'JsonWebTokenError') {
@@ -144,7 +143,14 @@ export async function refreshAccessToken(
       .status(200)
       .cookie("accessToken", accessToken, options)
       .cookie("refreshToken", refreshToken, options)
-      .json({ accessToken, refreshToken, message: "Access token refreshed" });
+      .json({
+        success: true,
+        data: {
+          accessToken,
+          refreshToken,
+          message: "Access token refreshed",
+        },
+      });
     eventEmitter.emit('refreshToken', {
       tokens: {
         accessToken,
@@ -167,7 +173,7 @@ export async function refreshAccessToken(
         {
           success: false,
           error: {
-            message: 'Expired token',
+            message: 'Expired [refresh] token.Try signing in.',
             error: err,
           },
         }

@@ -2,13 +2,12 @@
 * Authentication services
 */
 
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 import User from "../models/user.model";
 import { TEST_SECRET } from "@/lib/config";
 import { ApiError } from "@/lib/error-handling";
 import { DecodedRefreshToken, UserMethods, UserObj } from "@/types";
-import { JwtPayload } from "jsonwebtoken";
 
 export const loginUser = async (email: string, password: string) => {
   // Validate email and password presence
@@ -103,8 +102,6 @@ export const refreshAccessToken = async (incomingRefreshToken: string) => {
   // Save refresh token in persisted user state
   user.refreshToken = refreshToken;
   await user.save();
-
-  // console.log('AR_TOKEN', accessToken, refreshToken); // SCAFF
 
   // return new access and refresh tokens
   return { accessToken, refreshToken };
