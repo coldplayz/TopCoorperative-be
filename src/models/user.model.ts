@@ -34,6 +34,10 @@ const UserSchema = new Schema({
     type: String,
     required: [true, 'Password is required'],
   },
+  isLoanable: {
+    type: Boolean,
+    default: true,
+  },
   role: {
     type: String,
     enum: [...Object.values(UserRoles)],

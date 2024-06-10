@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, Request, Response, NextFunction } from "express";
 
 import {
   loginUser,
@@ -6,9 +6,10 @@ import {
   refreshAccessToken,
 } from "../controllers/auth.controller";
 import {
-  verifyJWT,
   loginValidator,
-} from "../middlewares/middleware";
+} from "@/src/middlewares/validation-middleware";
+import { verifyJWT } from "@/src/middlewares/authn-middleware";
+import { AuthenticatedRequest } from "@/types";
 
 const authRouter = Router();
 
@@ -16,7 +17,13 @@ const authRouter = Router();
 authRouter.post('/signin', loginValidator, loginUser);
 
 // Logout
-authRouter.post('/signout', verifyJWT, logoutUser);
+authRouter.post(
+  '/signout',
+  verifyJWT,
+  (req: Request, res: Response, next: NextFunction) => {
+    logoutUser(req as AuthenticatedRequest, res, next);
+  }
+);
 
 // Refresh token
 authRouter.post('/refresh-token', refreshAccessToken);

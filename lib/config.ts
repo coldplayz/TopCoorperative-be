@@ -35,6 +35,7 @@ export const Routes = {
     getLoanById: { path: '/:id' },
     createLoan: { path: '/' },
     editLoanById: { path: '/:id' },
+    payLoanById: { path: '/:id/pay' },
     deleteLoanById: { path: ':id' },
   },
   request: {
@@ -42,6 +43,8 @@ export const Routes = {
     getRequestById: { path: '/:id' },
     createRequest: { path: '/' },
     editRequestById: { path: '/:id' },
+    approveRequestById: { path: '/:id/approve' },
+    declineRequestById: { path: '/:id/decline' },
     deleteRequestById: { path: ':id' },
   },
 };
@@ -52,12 +55,15 @@ const routeAuthzVector = [
   [Routes.loan.createLoan, AuthZ.verifyCreateLoanAuthz],
   [Routes.loan.deleteLoanById, AuthZ.verifyDeleteLoanAuthz],
   [Routes.loan.editLoanById, AuthZ.verifyEditLoanAuthz],
+  [Routes.loan.payLoanById, AuthZ.verifyPayLoanAuthz],
   [Routes.loan.getLoanById, AuthZ.verifyReadLoanAuthz],
   [Routes.loan.getLoans, AuthZ.verifyReadLoansAuthz],
   // requests
   [Routes.request.createRequest, AuthZ.verifyCreateRequestAuthz],
   [Routes.request.deleteRequestById, AuthZ.verifyDeleteRequestAuthz],
   [Routes.request.editRequestById, AuthZ.verifyEditRequestAuthz],
+  [Routes.request.approveRequestById, AuthZ.verifyApproveRequestAuthz],
+  [Routes.request.declineRequestById, AuthZ.verifyDeclineRequestAuthz],
   [Routes.request.getRequestById, AuthZ.verifyReadRequestAuthz],
   [Routes.request.getRequests, AuthZ.verifyReadRequestsAuthz],
   // users
@@ -81,6 +87,7 @@ export const RequestResourceRBAC = {
     readOwnRequests: [UserRoles.USER, UserRoles.ADMIN],
     readOwnRequest: [UserRoles.USER, UserRoles.ADMIN],
     readAllRequests: [UserRoles.ADMIN],
+    readAnyRequests: [UserRoles.ADMIN],
     readAnyRequest: [UserRoles.ADMIN],
     editOwnRequest: [UserRoles.USER, UserRoles.ADMIN],
     editAnyRequest: [UserRoles.ADMIN],
@@ -98,11 +105,14 @@ export const LoanResourceRBAC = {
     readOwnLoans: [UserRoles.USER, UserRoles.ADMIN],
     readOwnLoan: [UserRoles.USER, UserRoles.ADMIN],
     readAllLoans: [UserRoles.ADMIN],
+    readAnyLoans: [UserRoles.ADMIN],
     readAnyLoan: [UserRoles.ADMIN],
     editOwnLoan: [UserRoles.USER, UserRoles.ADMIN],
     editAnyLoan: [UserRoles.ADMIN],
+    payAnyLoan: [UserRoles.ADMIN],
+    payOwnLoan: [UserRoles.USER, UserRoles.ADMIN],
     deleteOwnLoan: [''],
-    deleteAnyLoan: [''],
+    deleteAnyLoan: [UserRoles.ADMIN],
   },
 };
 

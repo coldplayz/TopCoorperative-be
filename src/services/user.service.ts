@@ -15,11 +15,30 @@ import {
   UserUpdateDTO,
   UserDoc,
   UserObj,
+  RequestUser,
 } from "@/types";
-// import { Document } from "mongoose";
+import { Types } from "mongoose";
 
-export async function getUsers(queryObj: UserQueryDTO) {
-  return User.find(queryObj);
+export async function getUsers(
+  queryObj: UserQueryDTO,
+  reqUser: RequestUser
+) {
+  if (reqUser.permissions.canReadOwn || reqUser.permissions.canReadAny) {
+    // Get user with specified ID; use `/:id` route instead.
+    const users = await User.find({
+      ...queryObj,
+      _id: new Types.ObjectId(reqUser.reqUserId),
+    });
+
+    return users;
+  }
+
+  if (reqUser.permissions.canReadAll) {
+    // Get all as authorized
+    return User.find(queryObj);
+  }
+
+  return [];
 }
 
 export async function getUserById(id: string) {
@@ -43,7 +62,7 @@ export async function editUserById(id: string, updateObj: UserUpdateDTO) {
 
   const updatedUser = updateUser(existingUser, updateObj);
 
-  updatedUser.save();
+  await updatedUser.save();
 
   return updateUser;
 }

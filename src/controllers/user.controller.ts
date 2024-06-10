@@ -19,6 +19,7 @@ import {
 } from "@/types";
 import { ApiError } from "@/lib/error-handling";
 import { getUserDataFrom, getUserQueryFrom, getUserUpdateFrom } from "@/lib/utils";
+import { Types } from "mongoose";
 
 // TODO:
 // - see about decoupling controller from data service; perhaps
@@ -26,18 +27,33 @@ import { getUserDataFrom, getUserQueryFrom, getUserUpdateFrom } from "@/lib/util
 // - data validation
 // - data formatting
 
-export async function getUsers(req: Request, res: Response, next: NextFunction) {
+export async function getUsers(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  /*
+  if (!req.user.reqUserId && !req.user.permissions.canReadAll) {
+    return res.status(403).json({
+      success: false,
+      error: 'Unauthorized to access other users data',
+    });
+  };
+  */
+
   const queryObj: UserQueryDTO = getUserQueryFrom(req.query);
 
   try {
-    const users = await userService.getUsers(queryObj);
+    const users = await userService.getUsers(
+      queryObj,
+      req.user
+    );
     res.json({
       success: true,
       data: users,
     });
     eventEmitter.emit('getUsers', { getUsers: true, users });
   } catch (err: any) {
-    // res.status(err.statusCode || 500).json({ success: false, error: err });
     next(err);
   }
 }
@@ -56,7 +72,6 @@ export async function getUserById(req: Request, res: Response, next: NextFunctio
     });
     eventEmitter.emit('getUserById', { getUserById: true, user });
   } catch (err: any) {
-    // res.status(err.statusCode || 500).json({ success: false, error: err });
     next(err);
   }
 }
@@ -86,7 +101,6 @@ export async function createUser(
     });
     eventEmitter.emit('createUser', { createUser: true, newUser });
   } catch (err: any) {
-    // res.status(err.statusCode || 500).json({ success: false, error: err });
     next(err);
   }
 }
@@ -103,7 +117,6 @@ export async function editUserById(req: Request, res: Response, next: NextFuncti
     });
     eventEmitter.emit('editUserById', { editUserById: true, editedUser });
   } catch (err: any) {
-    // res.status(err.statusCode || 500).json({ success: false, error: err });
     next(err);
   }
 }
@@ -116,7 +129,6 @@ export async function deleteUserById(req: Request, res: Response, next: NextFunc
     res.status(204).json({ success: true, result });
     eventEmitter.emit('deleteUserById', { data: {} });
   } catch (err: any) {
-    // res.status(err.statusCode || 500).json({ success: false, error: err });
     next(err);
   }
 }

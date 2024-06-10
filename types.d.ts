@@ -20,11 +20,15 @@ type RequestUser = DecodedAccessToken & {
     canReadAll?: boolean;
     canEditOwn?: boolean;
     canEditAny?: boolean;
+    canApproveAny?: boolean;
+    canDeclineAny?: boolean;
     canDeleteOwn?: boolean;
     canDeleteAny?: boolean;
-  }
+  },
+  reqUserId: string;
 };
 type AuthenticatedRequest = Request & { user: RequestUser };
+type ReqUserPermissions = RequestUser['permissions'];
 
 // ======= Users =======
 
@@ -35,12 +39,13 @@ type BaseUserDTO = {
   password?: string;
   refreshToken?: string;
   role?: string;
+  isLoanable?: boolean;
 }
 type RawBaseUserDTO = {
   [k in keyof BaseUserDTO]: string;
 };
 
-type UserCreateDTO = Required<Omit<BaseUserDTO, 'refreshToken' | 'role'>>;
+type UserCreateDTO = Required<Omit<BaseUserDTO, 'refreshToken' | 'role' | 'isLoanable'>> & { role?: string };
 type RawUserCreateDTO = {
   [k in keyof UserCreateDTO]: string;
 };

@@ -3,48 +3,13 @@
  */
 
 import * as jwt from "jsonwebtoken";
-import { body } from "express-validator";
 import { TEST_SECRET } from "@/lib/config";
 import { Request, Response, NextFunction } from "express";
 
 import User from "@/src/models/user.model";
 import { DecodedAccessToken, RequestUser, UserDoc } from "@/types";
 
-export const loginValidator = [
-    body("email")
-        .trim()
-        .notEmpty()
-        .withMessage("Email CANNOT be empty")
-        .bail()
-        .isEmail()
-        .withMessage("Email is invalid"),
-    body("password").notEmpty().withMessage("Password CANNOT be empty"),
-];
-
-export const signupValidator = [
-    body("firstName")
-        .trim()
-        .notEmpty()
-        .withMessage("Firstname CANNOT be empty"),
-    body("lastName")
-        .trim()
-        .notEmpty()
-        .withMessage("Lastname CANNOT be empty"),
-    body("email")
-        .trim()
-        .notEmpty()
-        .withMessage("Email CANNOT be empty")
-        .bail()
-        .isEmail()
-        .withMessage("Email is invalid")
-        .bail(),
-    body("password")
-        .notEmpty()
-        .withMessage("Password CANNOT be empty")
-        .bail(),
-        // .isLength({ min: 4 })
-        // .withMessage("Password MUST be at least 4 characters long"),
-];
+const log = console.log; // SCAFF
 
 export const verifyJWT = async (
   req: Request & { user?: {} },
@@ -57,7 +22,6 @@ export const verifyJWT = async (
       req.header("Authorization")?.replace("Bearer ", "") ||
       req.cookies?.accessToken;
 
-    // console.log('TOKEN', token); // SCAFF
 
     // If there's no token, deny access with a 401 Unauthorized status
     if (!token) {
@@ -84,7 +48,7 @@ export const verifyJWT = async (
 
     // Attach user info to the request for further use
     const reqUser = {
-      id: user._id,
+      id: user._id.toString(),
       email: user.email,
       role: user.role,
       permissions: {},
@@ -113,9 +77,7 @@ export const verifyJWT = async (
         }
       );
     }
-    return res.status(err.statusCode || 500).json({
-      success: false,
-      error: err,
-    });
+
+    next(err);
   }
 };

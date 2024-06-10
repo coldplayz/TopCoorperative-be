@@ -12,6 +12,7 @@ import * as userService from "@/src/services/user.service";
 import * as loanService from "@/src/services/loan.service";
 import eventEmitter from "../events/api-events";
 import {
+  AuthenticatedRequest,
   DecodedAccessToken,
   LoanCreateDTO,
   LoanQueryDTO,
@@ -25,6 +26,7 @@ import {
   getLoanReqUpdateFrom,
   getLoanUpdateFrom,
 } from "@/lib/utils";
+import { Types } from "mongoose";
 
 // TODO:
 // - see about decoupling controller from data service; perhaps
@@ -34,23 +36,44 @@ import {
 // - see about matching request [param] id with...
 //   auth user id during authorization for ops like editing and deleting.
 
-export async function getLoans(req: Request, res: Response, next: NextFunction) {
-  const queryObj: LoanQueryDTO = getLoanQueryFrom(req.query);
+export async function getLoans(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  /*
+  if (!req.user.reqUserId && !req.user.permissions.canReadAll) {
+    return res.status(403).json({
+      success: false,
+      error: 'Unauthorized to access other users data',
+    });
+  };
+  */
+
+  const queryObj: LoanQueryDTO = getLoanQueryFrom(
+    req.query,
+  );
 
   try {
-    const loans = await loanService.getLoans(queryObj);
+    const loans = await loanService.getLoans(
+      queryObj,
+      req.user
+    );
     res.json({
       success: true,
       data: loans,
     });
     eventEmitter.emit('getLoans', { getLoans: true, loans });
   } catch (err: any) {
-    // res.status(err.statusCode || 500).json({ success: false, error: err });
     next(err);
   }
 }
 
-export async function getLoanById(req: Request, res: Response, next: NextFunction) {
+export async function getLoanById(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
   const { id } = req.params;
 
   try {
@@ -61,13 +84,12 @@ export async function getLoanById(req: Request, res: Response, next: NextFunctio
     });
     eventEmitter.emit('getLoanById', { getLoanById: true, loan });
   } catch (err: any) {
-    // res.status(err.statusCode || 500).json({ success: false, error: err });
     next(err);
   }
 }
 
 export async function createLoan(
-  req: Request & { user: DecodedAccessToken },
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ) {
@@ -84,12 +106,15 @@ export async function createLoan(
     });
     eventEmitter.emit('createLoan', { createLoan: true, newLoan });
   } catch (err: any) {
-    // res.status(err.statusCode || 500).json({ success: false, error: err });
     next(err);
   }
 }
 
-export async function editLoanById(req: Request, res: Response, next: NextFunction) {
+export async function editLoanById(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
   const { id } = req.params;
   const updateData: LoanUpdateDTO = getLoanUpdateFrom(req.body);
 
@@ -106,12 +131,31 @@ export async function editLoanById(req: Request, res: Response, next: NextFuncti
       updatedLoan,
     });
   } catch (err: any) {
-    // res.status(err.statusCode || 500).json({ success: false, error: err });
     next(err);
   }
 }
 
-export async function deleteLoanById(req: Request, res: Response, next: NextFunction) {
+export async function payLoanById(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const paidLoan = await loanService.payLoanById(req.params.id);
+    res.json({
+      success: true,
+      data: paidLoan,
+    });
+  } catch (err: any) {
+    next(err);
+  }
+}
+
+export async function deleteLoanById(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
   const { id } = req.params;
 
   try {
@@ -119,7 +163,6 @@ export async function deleteLoanById(req: Request, res: Response, next: NextFunc
     res.status(204).json({ success: true, result });
     eventEmitter.emit('deleteLoanById', { data: {} });
   } catch (err: any) {
-    // res.status(err.statusCode || 500).json({ success: false, error: err });
     next(err);
   }
 }

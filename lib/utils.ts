@@ -21,6 +21,7 @@ import {
   RequestUpdateDTO,
   UserCreateDTO,
   UserDoc,
+  ReqUserPermissions,
   UserQueryDTO,
   UserUpdateDTO,
 } from "@/types";
@@ -61,7 +62,9 @@ export function getLoanReqUpdateFrom(req: RawRequestUpdateDTO) {
 * Give an HTTP request query or body, return an object of the
 * non-nullish properties coerced to their db data types.
 */
-export function getLoanReqQueryFrom(req: RawRequestQueryDTO) {
+export function getLoanReqQueryFrom(
+  req: RawRequestQueryDTO,
+) {
   const q = req;
   const queryObj: RequestQueryDTO = {};
 
@@ -135,7 +138,9 @@ export function getLoanUpdateFrom(req: RawLoanUpdateDTO) {
 * Give an HTTP request query or body, return an object of the
 * non-nullish properties coerced to their db data types.
 */
-export function getLoanQueryFrom(req: RawLoanQueryDTO) {
+export function getLoanQueryFrom(
+  req: RawLoanQueryDTO,
+) {
   const q = req;
   const queryObj: LoanQueryDTO = {};
 
@@ -180,6 +185,7 @@ export function updateUser(user: UserDoc, updateObj: UserUpdateDTO) {
   if (q.firstName) user.firstName = q.firstName;
   if (q.lastName) user.lastName = q.lastName;
   if (q.role) user.role = q.role;
+  if (q.isLoanable) user.isLoanable = q.isLoanable;
 
   return user;
 };
@@ -196,6 +202,8 @@ export function getUserUpdateFrom(req: RawUserUpdateDTO) {
   if (q.firstName) updateObj.firstName = q.firstName;
   if (q.lastName) updateObj.lastName = q.lastName;
   if (q.role) updateObj.role = q.role;
+  if (q.isLoanable != null) updateObj.isLoanable = ((q.isLoanable === 'true') || q.isLoanable)
+    ? true : false; // true or non-empty string = true
 
   return updateObj;
 };
@@ -212,6 +220,8 @@ export function getUserQueryFrom(req: RawUserQueryDTO) {
   if (q.firstName) queryObj.firstName = q.firstName;
   if (q.lastName) queryObj.lastName = q.lastName;
   if (q.role) queryObj.role = q.role;
+  if (q.isLoanable != null) queryObj.isLoanable = ((q.isLoanable === 'true') || q.isLoanable)
+    ? true : false; // true or non-empty string = true
   if (q.createdAt) queryObj.createdAt = new Date(q.createdAt);
   if (q.updatedAt) queryObj.updatedAt = new Date(q.updatedAt);
 
@@ -229,12 +239,14 @@ export function getUserDataFrom(req: RawUserCreateDTO) {
   const firstName = q.firstName;
   const lastName = q.lastName;
   const password = q.password;
+  const role = q.role;
 
   const reqData: UserCreateDTO = {
     email,
     firstName,
     lastName,
     password,
+    role,
   };
 
   return reqData;

@@ -4,7 +4,7 @@ import UserModel from "@/src/models/user.model";
 import RequestModel from "@/src/models/request.model";
 import LoanModel from "@/src/models/loan.model";
 import connectDB from "@/src/connection";
-import { DATABASE_NAME } from "@/lib/config";
+import { DATABASE_NAME, UserRoles } from "@/lib/config";
 import {
   LoanCreateDTO,
   RawRequestCreateDTO,
@@ -39,18 +39,33 @@ const dueDate = new Date(now.setMonth(now.getMonth() + 12));
 const db = DATABASE_NAME;
 
 // prepare raw seed data
-const userData: UserCreateDTO[] = [
+const userData: (UserCreateDTO & { isLoanable?: boolean })[] = [
   {
     firstName: 'Greenbel',
     lastName: 'Eleghasim',
     email: 'obisann@gmail.com',
     password: 'greenbelpwd',
+    isLoanable: false,
   },
   {
     firstName: 'David',
     lastName: 'Eleghasim',
     email: 'david@gmail.com',
     password: 'davidpwd',
+    isLoanable: false,
+  },
+  {
+    firstName: 'Charles',
+    lastName: 'Okoro',
+    email: 'charles@gmail.com',
+    password: 'charlespwd',
+  },
+  {
+    firstName: 'Admin',
+    lastName: 'One',
+    email: 'admin@gmail.com',
+    password: 'adminpwd',
+    role: UserRoles.ADMIN,
   },
 ];
 
@@ -67,6 +82,12 @@ const gbRequestDataNoUser: RequestCreateDTO[] = [
     tenure: 12,
     userId: dummyObjectId, // ! add userId prop before saving
   },
+  {
+    amountRequested: 300000,
+    amountRepayable: 330000,
+    tenure: 12,
+    userId: dummyObjectId, // ! add userId prop before saving
+  },
 ];
 
 const dvRequestDataNoUser: RequestCreateDTO[] = [
@@ -79,6 +100,10 @@ const dvRequestDataNoUser: RequestCreateDTO[] = [
 ];
 
 const gbLoanNoRequest: LoanCreateDTO[] = [
+  {
+    dueDate,
+    requestId: dummyObjectId, // ! replace with actual req ID
+  },
   {
     dueDate,
     requestId: dummyObjectId, // ! replace with actual req ID
@@ -128,11 +153,11 @@ async function seeder() {
   await seed(RequestModel, { docs: dvReqData, isModelled: false }, dvSeededRequests);
 
   // seed gb loans
-  const gbLoanData: LoanCreateDTO[] = gbLoanNoRequest.map((loanObj) => {
+  const gbLoanData: LoanCreateDTO[] = gbLoanNoRequest.map((loanObj, i) => {
     // return loans with [gb] req id attached, before saving
     return {
       ...loanObj,
-      requestId: gbSeededRequests[0],
+      requestId: gbSeededRequests[i],
     };
   });
 
@@ -159,7 +184,7 @@ async function seed(
   seedCollector: Types.ObjectId[]
 ) {
   if (seedCount.get(Model) === 0) {
-    // drop old data
+    // Drop old data, once.
     await Model.deleteMany({});
     seedCount.set(Model, 1);
   }

@@ -9,17 +9,58 @@
 import { ApiError } from "@/lib/error-handling";
 import { updateLoan } from "@/lib/utils";
 import Loan from "@/src/models/loan.model";
+import LoanReq from "@/src/models/request.model";
+import { editUserById } from "@/src/services/user.service";
+
 import {
   RawLoanUpdateDTO,
   LoanCreateDTO,
   LoanQueryDTO,
   LoanUpdateDTO,
   LoanDoc,
+  RequestUser,
 } from "@/types";
+import { Types } from "mongoose";
 // import { Document } from "mongoose";
 
-export async function getLoans(queryObj: LoanQueryDTO) {
-  return Loan.find(queryObj);
+const log = console.log; // SCAFF
+
+export async function getLoans(
+  queryObj: LoanQueryDTO,
+  reqUser: RequestUser
+) {
+  if (reqUser.permissions.canReadOwn || reqUser.permissions.canReadAny) {
+    // Get loans for the specific user.
+    // TODO: optimize in a single db request, e.g. aggregation
+
+    // First, get matching request IDs...
+    const userReqObjs = await LoanReq.find({
+      userId: new Types.ObjectId(reqUser.reqUserId),
+    })
+      .select({ _id: 1 })
+      .lean();
+    const userReqIds = userReqObjs.map((userReqObj) => userReqObj._id);
+
+    // log(userReqIds, queryObj); // SCAFF
+
+    // ...then, get matching loans
+    /* Also works!
+    const userLoans = await Loan.find({
+      ...queryObj,
+      requestId: { $in: userReqIds },
+    });
+    */
+    const userLoans = await Loan.find(queryObj)
+      .where('requestId').in(userReqIds);
+
+    return userLoans;
+  }
+
+  if (reqUser.permissions.canReadAll) {
+    return Loan.find(queryObj);
+  }
+
+  return [];
 }
 
 export async function getLoanById(id: string) {
@@ -48,6 +89,33 @@ export async function editLoanById(id: string, updateObj: LoanUpdateDTO) {
   await updatedLoan.save();
 
   return updatedLoan;
+}
+
+export async function payLoanById(id: string) {
+  // First, update loan...
+  const loan = await Loan.findById(id);
+
+  if (!loan) {
+    const error = new ApiError('Loan not found', 404);
+    throw error;
+  }
+
+  loan.hasPaid = true;
+  const updatedLoan = await loan.save();
+
+  // ...then, update user to become loanable again
+  const reqObj = await LoanReq
+    .findById(loan.requestId)
+    .select({ userId: 1 });
+
+  if (!reqObj) {
+    const error = new ApiError('Orphaned loan. No parent Request found.', 404);
+    throw error;
+  }
+
+  await editUserById(reqObj.userId.toString(), { isLoanable: true });
+
+  return updateLoan;
 }
 
 export async function deleteLoanById(id: string) {

@@ -7,6 +7,8 @@ import {
 } from "@/lib/config";
 import { AuthenticatedRequest } from "@/types";
 
+const log = console.log // SCAFF
+
 // ======= Requests =======
 
 /**
@@ -25,25 +27,31 @@ export async function verifyReadRequestsAuthz(
   const role = req.user.role;
   const tknUserId = req.user.id;
   // query-specified ID takes precedence
-  const reqUserId = req.query?.userId || tknUserId;
-
+  const reqUserId = req.query?.userId as string || '';
+  
   if (tknUserId !== reqUserId) {
-    // check if allowed to  access any resource
-    if (RequestResourceRBAC.permissions.readAllRequests.includes(role)) {
-      // permitted; likely admin.
-      req.user.permissions.canReadAll = true;
-      return next();
+    // check if allowed to  access any or all resources
+    if (reqUserId) {
+      if (RequestResourceRBAC.permissions.readAnyRequests.includes(role)) {
+        // permitted; likely admin. Read any user specified
+        req.user.reqUserId = reqUserId;
+        req.user.permissions.canReadAny = true;
+        return next();
+      }
     }
 
-    // Not own resource, and not permitted to access just any.
-    return res.status(403).json({
-      success: false,
-      error: 'Unauthorized',
-    });
+    if (reqUserId === '') {
+      if (RequestResourceRBAC.permissions.readAllRequests.includes(role)) {
+        // Likely admin; read all users
+        req.user.permissions.canReadAll = true;
+        return next();
+      }
+    }
   }
 
   // Wants to access own resource
   if (RequestResourceRBAC.permissions.readOwnRequests.includes(role)) {
+    req.user.reqUserId = tknUserId;
     req.user.permissions.canReadOwn = true;
     return next();
   }
@@ -69,25 +77,33 @@ export async function verifyReadRequestAuthz(
 ) {
   const role = req.user.role;
   const tknUserId = req.user.id;
-  const reqUserId = req.params?.id || tknUserId;
+  const reqUserId = req.query?.id as string || '';
 
   if (tknUserId !== reqUserId) {
-    // check if allowed to  access any resource
-    if (RequestResourceRBAC.permissions.readAnyRequest.includes(role)) {
-      // permitted; likely admin.
-      req.user.permissions.canReadAny = true;
-      return next();
+    if (reqUserId) {
+      // check if allowed to access any or all resources
+      if (RequestResourceRBAC.permissions.readAnyRequest.includes(role)) {
+        // permitted for any; likely admin.
+        req.user.reqUserId = reqUserId;
+        req.user.permissions.canReadAny = true;
+        return next();
+      } else {
+        // Trying to access other user's resource
+        return unauthorize(res);
+      }
     }
+  }
 
-    // Not own resource, and not permitted to access just any.
-    return res.status(403).json({
-      success: false,
-      error: 'Unauthorized',
-    });
+  if (RequestResourceRBAC.permissions.readAnyRequest.includes(role)) {
+    // likely admin; permitted for any
+    req.user.reqUserId = tknUserId;
+    req.user.permissions.canReadAny = true;
+    return next();
   }
 
   // Wants to access own resource
   if (RequestResourceRBAC.permissions.readOwnRequest.includes(role)) {
+    req.user.reqUserId = tknUserId;
     req.user.permissions.canReadOwn = true;
     return next();
   }
@@ -113,25 +129,26 @@ export async function verifyCreateRequestAuthz(
 ) {
   const role = req.user.role;
   const tknUserId = req.user.id;
-  const reqUserId = req.query?.userId || tknUserId;
+  const reqUserId = req.query?.userId as string || '';
 
   if (tknUserId !== reqUserId) {
-    // check if allowed to access any resource
-    if (RequestResourceRBAC.permissions.createAnyRequest.includes(role)) {
-      // permitted; likely admin.
-      req.user.permissions.canCreateAny = true;
-      return next();
+    if (reqUserId) {
+      // check if allowed to access any or all resources
+      if (RequestResourceRBAC.permissions.createAnyRequest.includes(role)) {
+        // permitted for any; likely admin.
+        req.user.reqUserId = reqUserId;
+        req.user.permissions.canCreateAny = true;
+        return next();
+      } else {
+        // Trying to access other user's resource
+        return unauthorize(res);
+      }
     }
-
-    // Not own resource, and not permitted to access just any.
-    return res.status(403).json({
-      success: false,
-      error: 'Unauthorized',
-    });
   }
 
   // Wants to access own resource
   if (RequestResourceRBAC.permissions.createOwnRequest.includes(role)) {
+    req.user.reqUserId = tknUserId;
     req.user.permissions.canCreateOwn = true;
     return next();
   }
@@ -158,25 +175,33 @@ export async function verifyEditRequestAuthz(
   const role = req.user.role;
   const tknUserId = req.user.id;
   // query-specified ID takes precedence
-  const reqUserId = req.query?.userId || tknUserId;
+  const reqUserId = req.query?.userId as string || '';
 
   if (tknUserId !== reqUserId) {
-    // check if allowed to  access any resource
-    if (RequestResourceRBAC.permissions.editAnyRequest.includes(role)) {
-      // permitted; likely admin.
-      req.user.permissions.canEditAny = true;
-      return next();
+    if (reqUserId) {
+      // check if allowed to access any or all resources
+      if (RequestResourceRBAC.permissions.editAnyRequest.includes(role)) {
+        // permitted for any; likely admin.
+        req.user.reqUserId = reqUserId;
+        req.user.permissions.canEditAny = true;
+        return next();
+      } else {
+        // Trying to access other user's resource
+        return unauthorize(res);
+      }
     }
+  }
 
-    // Not own resource, and not permitted to access just any.
-    return res.status(403).json({
-      success: false,
-      error: 'Unauthorized',
-    });
+  if (RequestResourceRBAC.permissions.editAnyRequest.includes(role)) {
+    // likely admin; permitted for any
+    req.user.reqUserId = tknUserId;
+    req.user.permissions.canEditAny = true;
+    return next();
   }
 
   // Wants to access own resource
   if (RequestResourceRBAC.permissions.editOwnRequest.includes(role)) {
+    req.user.reqUserId = tknUserId;
     req.user.permissions.canEditOwn = true;
     return next();
   }
@@ -203,25 +228,33 @@ export async function verifyDeleteRequestAuthz(
   const role = req.user.role;
   const tknUserId = req.user.id;
   // query-specified ID takes precedence
-  const reqUserId = req.query?.userId || tknUserId;
+  const reqUserId = req.query?.userId as string || '';
 
   if (tknUserId !== reqUserId) {
-    // check if allowed to  access any resource
-    if (RequestResourceRBAC.permissions.deleteAnyRequest.includes(role)) {
-      // permitted; likely admin.
-      req.user.permissions.canDeleteAny = true;
-      return next();
+    if (reqUserId) {
+      // check if allowed to access any or all resources
+      if (RequestResourceRBAC.permissions.deleteAnyRequest.includes(role)) {
+        // permitted for any; likely admin.
+        req.user.reqUserId = reqUserId;
+        req.user.permissions.canDeleteAny = true;
+        return next();
+      } else {
+        // Trying to access other user's resource
+        return unauthorize(res);
+      }
     }
+  }
 
-    // Not own resource, and not permitted to access just any.
-    return res.status(403).json({
-      success: false,
-      error: 'Unauthorized',
-    });
+  if (RequestResourceRBAC.permissions.deleteAnyRequest.includes(role)) {
+    // likely admin; permitted for any
+    req.user.reqUserId = tknUserId;
+    req.user.permissions.canDeleteAny = true;
+    return next();
   }
 
   // Wants to access own resource
   if (RequestResourceRBAC.permissions.deleteOwnRequest.includes(role)) {
+    req.user.reqUserId = tknUserId;
     req.user.permissions.canDeleteOwn = true;
     return next();
   }
@@ -230,6 +263,36 @@ export async function verifyDeleteRequestAuthz(
     success: false,
     error: 'Unauthorized',
   });
+}
+
+export async function verifyApproveRequestAuthz(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  const role = req.user.role;
+
+  if (RequestResourceRBAC.permissions.approveAnyRequest.includes(role)) {
+    req.user.permissions.canApproveAny = true;
+    return next();
+  } else {
+    return unauthorize(res);
+  }
+}
+
+export async function verifyDeclineRequestAuthz(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  const role = req.user.role;
+
+  if (RequestResourceRBAC.permissions.declineAnyRequest.includes(role)) {
+    req.user.permissions.canDeclineAny = true;
+    return next();
+  } else {
+    return unauthorize(res);
+  }
 }
 
 // ======= Loans =======
@@ -250,25 +313,35 @@ export async function verifyReadLoansAuthz(
   const role = req.user.role;
   const tknUserId = req.user.id;
   // query-specified ID takes precedence
-  const reqUserId = req.query?.userId || tknUserId;
+  const reqUserId = req.query?.userId as string || '';
 
   if (tknUserId !== reqUserId) {
-    // check if allowed to  access any resource
-    if (LoanResourceRBAC.permissions.readAllLoans.includes(role)) {
-      // permitted; likely admin.
-      req.user.permissions.canReadAll = true;
-      return next();
+    if (reqUserId) {
+      // check if allowed to access any or all resources
+      if (LoanResourceRBAC.permissions.readAnyLoans.includes(role)) {
+        // permitted for any; likely admin.
+        req.user.reqUserId = reqUserId;
+        req.user.permissions.canReadAny = true;
+        return next();
+      } else {
+        // Trying to access other user's resource
+        return unauthorize(res);
+      }
     }
 
-    // Not own resource, and not permitted to access just any.
-    return res.status(403).json({
-      success: false,
-      error: 'Unauthorized',
-    });
+    // log('in get all users'); // SCAFF
+    if (reqUserId === '') {
+      if (LoanResourceRBAC.permissions.readAllLoans.includes(role)) {
+        // permitted for all; likely admin
+        req.user.permissions.canReadAll = true;
+        return next();
+      }
+    }
   }
 
   // Wants to access own resource
   if (LoanResourceRBAC.permissions.readOwnLoans.includes(role)) {
+    req.user.reqUserId = tknUserId;
     req.user.permissions.canReadOwn = true;
     return next();
   }
@@ -294,25 +367,33 @@ export async function verifyReadLoanAuthz(
 ) {
   const role = req.user.role;
   const tknUserId = req.user.id;
-  const reqUserId = req.params?.id || tknUserId;
+  const reqUserId = req.query?.id as string || '';
 
   if (tknUserId !== reqUserId) {
-    // check if allowed to access any resource
-    if (LoanResourceRBAC.permissions.readAnyLoan.includes(role)) {
-      // permitted; likely admin.
-      req.user.permissions.canReadAny = true;
-      return next();
+    if (reqUserId) {
+      // check if allowed to access any or all resources
+      if (LoanResourceRBAC.permissions.readAnyLoan.includes(role)) {
+        // permitted for any; likely admin.
+        req.user.reqUserId = reqUserId;
+        req.user.permissions.canReadAny = true;
+        return next();
+      } else {
+        // Trying to access other user's resource
+        return unauthorize(res);
+      }
     }
+  }
 
-    // Not own resource, and not permitted to access just any.
-    return res.status(403).json({
-      success: false,
-      error: 'Unauthorized',
-    });
+  if (LoanResourceRBAC.permissions.readAnyLoan.includes(role)) {
+    // likely admin; permitted for any
+    req.user.reqUserId = tknUserId;
+    req.user.permissions.canReadAny = true;
+    return next();
   }
 
   // Wants to access own resource
   if (LoanResourceRBAC.permissions.readOwnLoan.includes(role)) {
+    req.user.reqUserId = tknUserId;
     req.user.permissions.canReadOwn = true;
     return next();
   }
@@ -338,25 +419,26 @@ export async function verifyCreateLoanAuthz(
 ) {
   const role = req.user.role;
   const tknUserId = req.user.id;
-  const reqUserId = req.query?.userId || tknUserId;
+  const reqUserId = req.query?.userId as string || '';
 
   if (tknUserId !== reqUserId) {
-    // check if allowed to access any resource
-    if (LoanResourceRBAC.permissions.createAnyLoan.includes(role)) {
-      // permitted; likely admin.
-      req.user.permissions.canCreateAny = true;
-      return next();
+    if (reqUserId) {
+      // check if allowed to access any or all resources
+      if (LoanResourceRBAC.permissions.createAnyLoan.includes(role)) {
+        // permitted for any; likely admin.
+        req.user.reqUserId = reqUserId;
+        req.user.permissions.canCreateAny = true;
+        return next();
+      } else {
+        // Trying to access other user's resource
+        return unauthorize(res);
+      }
     }
-
-    // Not own resource, and not permitted to access just any.
-    return res.status(403).json({
-      success: false,
-      error: 'Unauthorized',
-    });
   }
 
   // Wants to access own resource
   if (LoanResourceRBAC.permissions.createOwnLoan.includes(role)) {
+    req.user.reqUserId = tknUserId;
     req.user.permissions.canCreateOwn = true;
     return next();
   }
@@ -383,25 +465,33 @@ export async function verifyEditLoanAuthz(
   const role = req.user.role;
   const tknUserId = req.user.id;
   // query-specified ID takes precedence
-  const reqUserId = req.query?.userId || tknUserId;
+  const reqUserId = req.query?.userId as string || '';
 
   if (tknUserId !== reqUserId) {
-    // check if allowed to  access any resource
-    if (LoanResourceRBAC.permissions.editAnyLoan.includes(role)) {
-      // permitted; likely admin.
-      req.user.permissions.canEditAny = true;
-      return next();
+    if (reqUserId) {
+      // check if allowed to access any or all resources
+      if (LoanResourceRBAC.permissions.editAnyLoan.includes(role)) {
+        // permitted for any; likely admin.
+        req.user.reqUserId = reqUserId;
+        req.user.permissions.canEditAny = true;
+        return next();
+      } else {
+        // Trying to access other user's resource
+        return unauthorize(res);
+      }
     }
+  }
 
-    // Not own resource, and not permitted to access just any.
-    return res.status(403).json({
-      success: false,
-      error: 'Unauthorized',
-    });
+  if (LoanResourceRBAC.permissions.editAnyLoan.includes(role)) {
+    // likely admin; permitted for any
+    req.user.reqUserId = tknUserId;
+    req.user.permissions.canEditAny = true;
+    return next();
   }
 
   // Wants to access own resource
   if (LoanResourceRBAC.permissions.editOwnLoan.includes(role)) {
+    req.user.reqUserId = tknUserId;
     req.user.permissions.canEditOwn = true;
     return next();
   }
@@ -410,6 +500,24 @@ export async function verifyEditLoanAuthz(
     success: false,
     error: 'Unauthorized',
   });
+}
+
+export async function verifyPayLoanAuthz(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  const role = req.user.role;
+
+  if (
+    LoanResourceRBAC.permissions.payOwnLoan.includes(role)
+    || LoanResourceRBAC.permissions.payAnyLoan.includes(role)
+  ) {
+    // req.user.permissions.canDeclineAny = true;
+    return next();
+  } else {
+    return unauthorize(res);
+  }
 }
 
 /**
@@ -428,25 +536,33 @@ export async function verifyDeleteLoanAuthz(
   const role = req.user.role;
   const tknUserId = req.user.id;
   // query-specified ID takes precedence
-  const reqUserId = req.query?.userId || tknUserId;
+  const reqUserId = req.query?.userId as string || '';
 
   if (tknUserId !== reqUserId) {
-    // check if allowed to  access any resource
-    if (LoanResourceRBAC.permissions.deleteAnyLoan.includes(role)) {
-      // permitted; likely admin.
-      req.user.permissions.canDeleteAny = true;
-      return next();
+    if (reqUserId) {
+      // check if allowed to access any or all resources
+      if (LoanResourceRBAC.permissions.deleteAnyLoan.includes(role)) {
+        // permitted for any; likely admin.
+        req.user.reqUserId = reqUserId;
+        req.user.permissions.canDeleteAny = true;
+        return next();
+      } else {
+        // Trying to access other user's resource
+        return unauthorize(res);
+      }
     }
+  }
 
-    // Not own resource, and not permitted to access just any.
-    return res.status(403).json({
-      success: false,
-      error: 'Unauthorized',
-    });
+  if (LoanResourceRBAC.permissions.deleteAnyLoan.includes(role)) {
+    // likely admin; permitted for any
+    req.user.reqUserId = tknUserId;
+    req.user.permissions.canDeleteAny = true;
+    return next();
   }
 
   // Wants to access own resource
   if (LoanResourceRBAC.permissions.deleteOwnLoan.includes(role)) {
+    req.user.reqUserId = tknUserId;
     req.user.permissions.canDeleteOwn = true;
     return next();
   }
@@ -475,25 +591,35 @@ export async function verifyReadUsersAuthz(
   const role = req.user.role;
   const tknUserId = req.user.id;
   // query-specified ID takes precedence
-  const reqUserId = req.query?.userId || tknUserId;
+  let reqUserId = req.query?.userId as string || '';
 
   if (tknUserId !== reqUserId) {
-    // check if allowed to  access any resource
-    if (UserResourceRBAC.permissions.readAllUserAccounts.includes(role)) {
-      // permitted; likely admin.
-      req.user.permissions.canReadAll = true;
-      return next();
+    if (reqUserId) {
+      // check if allowed to access any or all resources
+      if (UserResourceRBAC.permissions.readAnyUserAccount.includes(role)) {
+        // permitted for any; likely admin.
+        req.user.reqUserId = reqUserId;
+        req.user.permissions.canReadAny = true;
+        return next();
+      } else {
+        // Trying to access other user's resource
+        return unauthorize(res);
+      }
     }
 
-    // Not own resource, and not permitted to access just any.
-    return res.status(403).json({
-      success: false,
-      error: 'Unauthorized',
-    });
+    // log('in get all users'); // SCAFF
+    if (reqUserId === '') {
+      if (UserResourceRBAC.permissions.readAllUserAccounts.includes(role)) {
+        // permitted for all; likely admin
+        req.user.permissions.canReadAll = true;
+        return next();
+      }
+    }
   }
 
   // Wants to access own resource
   if (UserResourceRBAC.permissions.readOwnUserAccount.includes(role)) {
+    req.user.reqUserId = tknUserId;
     req.user.permissions.canReadOwn = true;
     return next();
   }
@@ -519,25 +645,26 @@ export async function verifyReadUserAuthz(
 ) {
   const role = req.user.role;
   const tknUserId = req.user.id;
-  const reqUserId = req.params?.id || tknUserId;
+  const reqUserId = req.params?.id || '';
 
   if (tknUserId !== reqUserId) {
-    // check if allowed to access any resource
-    if (UserResourceRBAC.permissions.readAnyUserAccount.includes(role)) {
-      // permitted; likely admin.
-      req.user.permissions.canReadAny = true;
-      return next();
+    if (reqUserId) {
+      // check if allowed to access any or all resources
+      if (UserResourceRBAC.permissions.readAnyUserAccount.includes(role)) {
+        // permitted for any; likely admin.
+        req.user.reqUserId = reqUserId;
+        req.user.permissions.canReadAny = true;
+        return next();
+      } else {
+        // Trying to access other user's resource
+        return unauthorize(res);
+      }
     }
-
-    // Not own resource, and not permitted to access just any.
-    return res.status(403).json({
-      success: false,
-      error: 'Unauthorized',
-    });
   }
 
   // Wants to access own resource
   if (UserResourceRBAC.permissions.readOwnUserAccount.includes(role)) {
+    req.user.reqUserId = tknUserId;
     req.user.permissions.canReadOwn = true;
     return next();
   }
@@ -563,25 +690,26 @@ export async function verifyCreateUserAuthz(
 ) {
   const role = req.user.role;
   const tknUserId = req.user.id;
-  const reqUserId = req.query?.userId || tknUserId;
+  const reqUserId = req.query?.userId as string || '';
 
   if (tknUserId !== reqUserId) {
-    // check if allowed to access any resource
-    if (UserResourceRBAC.permissions.createAnyUserAccount.includes(role)) {
-      // permitted; likely admin.
-      req.user.permissions.canCreateAny = true;
-      return next();
+    if (reqUserId) {
+      // check if allowed to access any or all resources
+      if (UserResourceRBAC.permissions.createAnyUserAccount.includes(role)) {
+        // permitted for any; likely admin.
+        req.user.reqUserId = reqUserId;
+        req.user.permissions.canCreateAny = true;
+        return next();
+      } else {
+        // Trying to access other user's resource
+        return unauthorize(res);
+      }
     }
-
-    // Not own resource, and not permitted to access just any.
-    return res.status(403).json({
-      success: false,
-      error: 'Unauthorized',
-    });
   }
 
   // Wants to access own resource
   if (UserResourceRBAC.permissions.createOwnUserAccount.includes(role)) {
+    req.user.reqUserId = tknUserId;
     req.user.permissions.canCreateOwn = true;
     return next();
   }
@@ -607,25 +735,33 @@ export async function verifyEditUserAuthz(
 ) {
   const role = req.user.role;
   const tknUserId = req.user.id;
-  const reqUserId = req.params?.id || tknUserId;
+  const reqUserId = req.params?.id || '';
 
   if (tknUserId !== reqUserId) {
-    // check if allowed to  access any resource
-    if (UserResourceRBAC.permissions.editAnyUserAccount.includes(role)) {
-      // permitted; likely admin.
-      req.user.permissions.canEditAny = true;
-      return next();
+    if (reqUserId) {
+      // check if allowed to access any or all resources
+      if (UserResourceRBAC.permissions.editAnyUserAccount.includes(role)) {
+        // permitted for any; likely admin.
+        req.user.reqUserId = reqUserId;
+        req.user.permissions.canEditAny = true;
+        return next();
+      } else {
+        // Trying to access other user's resource
+        return unauthorize(res);
+      }
     }
+  }
 
-    // Not own resource, and not permitted to access just any.
-    return res.status(403).json({
-      success: false,
-      error: 'Unauthorized',
-    });
+  if (UserResourceRBAC.permissions.editAnyUserAccount.includes(role)) {
+    // likely admin; permitted for any
+    req.user.reqUserId = tknUserId;
+    req.user.permissions.canEditAny = true;
+    return next();
   }
 
   // Wants to access own resource
   if (UserResourceRBAC.permissions.editOwnUserAccount.includes(role)) {
+    req.user.reqUserId = tknUserId;
     req.user.permissions.canEditOwn = true;
     return next();
   }
@@ -651,25 +787,33 @@ export async function verifyDeleteUserAuthz(
 ) {
   const role = req.user.role;
   const tknUserId = req.user.id;
-  const reqUserId = req.params?.id || tknUserId;
+  const reqUserId = req.params?.id || '';
 
   if (tknUserId !== reqUserId) {
-    // check if allowed to  access any resource
-    if (UserResourceRBAC.permissions.deleteAnyUserAccount.includes(role)) {
-      // permitted; likely admin.
-      req.user.permissions.canDeleteAny = true;
-      return next();
+    if (reqUserId) {
+      // check if allowed to access any or all resources
+      if (UserResourceRBAC.permissions.deleteAnyUserAccount.includes(role)) {
+        // permitted for any; likely admin.
+        req.user.reqUserId = reqUserId;
+        req.user.permissions.canDeleteAny = true;
+        return next();
+      } else {
+        // Trying to access other user's resource
+        return unauthorize(res);
+      }
     }
+  }
 
-    // Not own resource, and not permitted to access just any.
-    return res.status(403).json({
-      success: false,
-      error: 'Unauthorized',
-    });
+  if (UserResourceRBAC.permissions.deleteAnyUserAccount.includes(role)) {
+    // likely admin; permitted for any
+    req.user.reqUserId = tknUserId;
+    req.user.permissions.canDeleteAny = true;
+    return next();
   }
 
   // Wants to access own resource
   if (UserResourceRBAC.permissions.deleteOwnUserAccount.includes(role)) {
+    req.user.reqUserId = tknUserId;
     req.user.permissions.canDeleteOwn = true;
     return next();
   }
@@ -679,3 +823,10 @@ export async function verifyDeleteUserAuthz(
     error: 'Unauthorized',
   });
 }
+
+const unauthorize = (res: Response) => {
+  return res.status(403).json({
+    success: false,
+    error: 'Unauthorized',
+  });
+};

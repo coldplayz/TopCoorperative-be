@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { NextFunction, Request, Response, Router } from "express";
 
 import {
   getUsers,
@@ -8,10 +8,11 @@ import {
   deleteUserById,
 } from "../controllers/user.controller";
 import {
-  verifyJWT,
   signupValidator,
-} from "../middlewares/middleware";
+} from "@/src/middlewares/validation-middleware";
+import { verifyJWT } from "@/src/middlewares/authn-middleware";
 import { Routes, routeAuthzMap } from "@/lib/config";
+import { AuthenticatedRequest } from "@/types";
 
 const userRouter = Router();
 
@@ -21,7 +22,9 @@ userRouter.get(
   '/',
   verifyJWT, // authN
   routeAuthzMap.get(Routes.user.getUsers), // authZ
-  getUsers
+  (req: Request, res: Response, next: NextFunction) => {
+    getUsers(req as AuthenticatedRequest, res, next);
+  }
 );
 
 // Get one user

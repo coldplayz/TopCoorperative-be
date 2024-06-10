@@ -7,13 +7,15 @@ import {
 import {  } from "mongoose";
 
 import {
+  approveRequestById,
+  declineRequestById,
   getRequests,
   getRequestById,
   createRequest,
   editRequestById,
   deleteRequestById,
 } from "@/src/controllers/request.controller";
-import { verifyJWT } from "@/src/middlewares/middleware";
+import { verifyJWT } from "@/src/middlewares/authn-middleware";
 import { Routes, routeAuthzMap } from "@/lib/config";
 import { AuthenticatedRequest } from "@/types";
 
@@ -24,7 +26,9 @@ requestRouter.get(
   '/',
   verifyJWT, // authN
   routeAuthzMap.get(Routes.request.getRequests), // authZ
-  getRequests
+  (req: Request, res: Response, next: NextFunction) => {
+    getRequests(req as AuthenticatedRequest, res, next);
+  }
 );
 
 // Get one request
@@ -32,7 +36,9 @@ requestRouter.get(
   '/:id',
   verifyJWT,
   routeAuthzMap.get(Routes.request.getRequestById), // authZ
-  getRequestById
+  (req: Request, res: Response, next: NextFunction) => {
+    getRequestById(req as AuthenticatedRequest, res, next);
+  }
 );
 
 // Create new request
@@ -50,7 +56,29 @@ requestRouter.put(
   '/:id',
   verifyJWT,
   routeAuthzMap.get(Routes.request.editRequestById), // authZ
-  editRequestById
+  (req: Request, res: Response, next: NextFunction) => {
+    editRequestById(req as AuthenticatedRequest, res, next);
+  }
+);
+
+// Approve a request
+requestRouter.put(
+  Routes.request.approveRequestById.path,
+  verifyJWT,
+  routeAuthzMap.get(Routes.request.approveRequestById), // authZ
+  (req: Request, res: Response, next: NextFunction) => {
+    approveRequestById(req as AuthenticatedRequest, res, next);
+  }
+);
+
+// Decline a request
+requestRouter.put(
+  Routes.request.declineRequestById.path,
+  verifyJWT,
+  routeAuthzMap.get(Routes.request.declineRequestById), // authZ
+  (req: Request, res: Response, next: NextFunction) => {
+    declineRequestById(req as AuthenticatedRequest, res, next);
+  }
 );
 
 // Delete a request
@@ -58,7 +86,9 @@ requestRouter.delete(
   '/:id',
   verifyJWT,
   routeAuthzMap.get(Routes.request.deleteRequestById), // authZ
-  deleteRequestById
+  (req: Request, res: Response, next: NextFunction) => {
+    deleteRequestById(req as AuthenticatedRequest, res, next);
+  }
 );
 
 export default requestRouter;

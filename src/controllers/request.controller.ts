@@ -12,6 +12,7 @@ import * as userService from "@/src/services/user.service";
 import * as requestService from "@/src/services/request.service";
 import eventEmitter from "../events/api-events";
 import {
+    AuthenticatedRequest,
   DecodedAccessToken,
   RequestCreateDTO,
   RequestQueryDTO,
@@ -31,23 +32,33 @@ import {
 // - see about matching request [param] id with...
 //   auth user id during authorization for ops like editing and deleting.
 
-export async function getRequests(req: Request, res: Response, next: NextFunction) {
+export async function getRequests(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
   const queryObj: RequestQueryDTO = getLoanReqQueryFrom(req.query);
 
   try {
-    const requests = await requestService.getRequests(queryObj);
+    const requests = await requestService.getRequests(
+      queryObj,
+      req.user
+    );
     res.json({
       success: true,
       data: requests,
     });
     eventEmitter.emit('getRequests', { getRequests: true, requests });
   } catch (err: any) {
-    // res.status(err.statusCode || 500).json({ success: false, error: err });
     next(err);
   }
 }
 
-export async function getRequestById(req: Request, res: Response, next: NextFunction) {
+export async function getRequestById(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
   const { id } = req.params;
 
   try {
@@ -58,19 +69,18 @@ export async function getRequestById(req: Request, res: Response, next: NextFunc
     });
     eventEmitter.emit('getRequestById', { getRequestById: true, request });
   } catch (err: any) {
-    // res.status(err.statusCode || 500).json({ success: false, error: err });
     next(err);
   }
 }
 
 export async function createRequest(
-  req: Request & { user: DecodedAccessToken },
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ) {
   const requestData: RequestCreateDTO = getLoanReqDataFrom(
     req.body,
-    req.user.id
+    req.user.reqUserId
   );
 
   try {
@@ -81,12 +91,15 @@ export async function createRequest(
     });
     eventEmitter.emit('createRequest', { createRequest: true, newRequest });
   } catch (err: any) {
-    // res.status(err.statusCode || 500).json({ success: false, error: err });
     next(err);
   }
 }
 
-export async function editRequestById(req: Request, res: Response, next: NextFunction) {
+export async function editRequestById(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
   const { id } = req.params;
   const updateData: RequestUpdateDTO = getLoanReqUpdateFrom(req.body);
 
@@ -103,12 +116,47 @@ export async function editRequestById(req: Request, res: Response, next: NextFun
       updatedRequest,
     });
   } catch (err: any) {
-    // res.status(err.statusCode || 500).json({ success: false, error: err });
     next(err);
   }
 }
 
-export async function deleteRequestById(req: Request, res: Response, next: NextFunction) {
+export async function approveRequestById(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const approvedRequest = await requestService.approveRequestById(req.params.id);
+    res.json({
+      success: true,
+      data: approvedRequest,
+    });
+  } catch (err: any) {
+    next(err);
+  }
+}
+
+export async function declineRequestById(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const declinedRequest = await requestService.declineRequestById(req.params.id);
+    res.json({
+      success: true,
+      data: declinedRequest,
+    });
+  } catch (err: any) {
+    next(err);
+  }
+}
+
+export async function deleteRequestById(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
   const { id } = req.params;
 
   try {
@@ -116,7 +164,6 @@ export async function deleteRequestById(req: Request, res: Response, next: NextF
     res.status(204).json({ success: true, result });
     eventEmitter.emit('deleteRequestById', { data: {} });
   } catch (err: any) {
-    // res.status(err.statusCode || 500).json({ success: false, error: err });
     next(err);
   }
 }
