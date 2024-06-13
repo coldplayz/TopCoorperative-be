@@ -27,6 +27,12 @@ Also, you can optionally set the following environment variables:
 | ------------ | :------------------------------------------------------------ |
 | `PORT`       | **Optional**. Server port. Default: `3456`.                   |
 
+Seed the database:
+
+```bash
+npm run seed
+```
+
 Start the dev server:
 ```bash
 npm run dev
@@ -44,6 +50,10 @@ That's the sanity check endpoint. It returns a simple object:
   "data": "LIVE"
 }
 ```
+
+You can log in with the following credentials for testing:
+- `email`: obisann@gmail.com
+- `password`: greenbelpwd
 
 ### Socket Event Stream
 
