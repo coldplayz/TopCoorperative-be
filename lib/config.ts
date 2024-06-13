@@ -1,6 +1,7 @@
 import * as AuthZ from "@/src/middlewares/authz-middleware";
 
-export const DATABASE_URI = process.env.DATABASE_URI || 'mongodb://localhost:3456/';
+export const DATABASE_URI = process.env.DATABASE_URI || 'mongodb://localhost:27017/';
+// console.log(process.env.DATABASE_URI); // SCAFF
 export const DATABASE_NAME = 'top-coorperative';
 
 // In production, generate with `openssl rand -{hex|base64} 32`

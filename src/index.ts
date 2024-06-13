@@ -3,6 +3,8 @@
  */
 
 import * as dotenv from "dotenv";
+dotenv.config();
+
 import express, {
   Request,
   Response,
@@ -13,6 +15,7 @@ import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import { Server } from "socket.io";
 import logger from "morgan";
+import { join } from "path";
 
 import { server, app } from "../src/app-server";
 import eventEmitter from "../src/events/api-events";
@@ -23,8 +26,6 @@ import requestRouter from "@/src/routes/request.route";
 import loanRouter from "@/src/routes/loan.route";
 import { ApiError } from "@/lib/error-handling";
 import { DATABASE_NAME } from "@/lib/config";
-
-dotenv.config();
 
 /**
  * Server and socket setup

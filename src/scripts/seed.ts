@@ -1,4 +1,6 @@
 import { Types, Model, Document } from "mongoose";
+import * as dotenv from "dotenv";
+dotenv.config();
 
 import UserModel from "@/src/models/user.model";
 import RequestModel from "@/src/models/request.model";
