@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node-dev -r tsconfig-paths/register --respawn --pretty --transpile-only src/index.ts",
-    "start": "ts-node -r tsconfig-paths/register --respawn src/index.ts",
+    "start": "ts-node -r tsconfig-paths/register src/index.ts",
     "seed": "npx ts-node --project ./tsconfig.json -r tsconfig-paths/register src/scripts/seed.ts"
   },
   "keywords": [],
