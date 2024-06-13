@@ -127,8 +127,7 @@ export function getLoanUpdateFrom(req: RawLoanUpdateDTO) {
   if (q.amountPaid) updateObj.amountPaid = parseInt(q.amountPaid);
   if (q.dueDate) updateObj.dueDate = new Date(q.dueDate);
   log(req); // SCAFF
-  if (q.hasPaid != null) updateObj.hasPaid = ((q.hasPaid === 'true') || q.hasPaid)
-    ? true : false; // true or non-empty string = true
+  if (q.hasPaid != null) updateObj.hasPaid = toBool(q.hasPaid);
   log(updateObj); // SCAFF
 
   return updateObj;
@@ -146,8 +145,7 @@ export function getLoanQueryFrom(
 
   if (q.amountPaid) queryObj.amountPaid = parseInt(q.amountPaid);
   if (q.dueDate) queryObj.dueDate = new Date(q.dueDate);
-  if (q.hasPaid != null) queryObj.hasPaid = ((q.hasPaid === 'true') || q.hasPaid)
-    ? true : false; // true or non-empty string = true
+  if (q.hasPaid != null) queryObj.hasPaid = toBool(q.hasPaid);
   if (q.requestId) queryObj.requestId = new Types.ObjectId(q.requestId);
   if (q.createdAt) queryObj.createdAt = new Date(q.createdAt);
   if (q.updatedAt) queryObj.updatedAt = new Date(q.updatedAt);
@@ -202,8 +200,7 @@ export function getUserUpdateFrom(req: RawUserUpdateDTO) {
   if (q.firstName) updateObj.firstName = q.firstName;
   if (q.lastName) updateObj.lastName = q.lastName;
   if (q.role) updateObj.role = q.role;
-  if (q.isLoanable != null) updateObj.isLoanable = ((q.isLoanable === 'true') || q.isLoanable)
-    ? true : false; // true or non-empty string = true
+  if (q.isLoanable != null) updateObj.isLoanable = toBool(q.isLoanable);
 
   return updateObj;
 };
@@ -220,8 +217,7 @@ export function getUserQueryFrom(req: RawUserQueryDTO) {
   if (q.firstName) queryObj.firstName = q.firstName;
   if (q.lastName) queryObj.lastName = q.lastName;
   if (q.role) queryObj.role = q.role;
-  if (q.isLoanable != null) queryObj.isLoanable = ((q.isLoanable === 'true') || q.isLoanable)
-    ? true : false; // true or non-empty string = true
+  if (q.isLoanable != null) queryObj.isLoanable = toBool(q.isLoanable);
   if (q.createdAt) queryObj.createdAt = new Date(q.createdAt);
   if (q.updatedAt) queryObj.updatedAt = new Date(q.updatedAt);
 
@@ -251,3 +247,13 @@ export function getUserDataFrom(req: RawUserCreateDTO) {
 
   return reqData;
 };
+
+/**
+ * Coverts true and false, as string, to boolean.
+ */
+function toBool(inp: boolean | string) {
+  if (inp === 'true' || inp === true) return true;
+  if (inp === 'false' || inp === false) return false;
+
+  throw new Error('Arg must be true or false, as boolean or string literals.');
+}

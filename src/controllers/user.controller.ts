@@ -21,6 +21,8 @@ import { ApiError } from "@/lib/error-handling";
 import { getUserDataFrom, getUserQueryFrom, getUserUpdateFrom } from "@/lib/utils";
 import { Types } from "mongoose";
 
+const log = console.log; // SCAFF
+
 // TODO:
 // - see about decoupling controller from data service; perhaps
 //   moving dependency injection to the main entry point - index.ts
@@ -75,6 +77,20 @@ export async function getUserById(req: Request, res: Response, next: NextFunctio
     next(err);
   }
 }
+
+/**
+ * Returns data for the signed-in user.
+ */
+export const getMe = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  res.json({
+    success: true,
+    data: req.user,
+  });
+};
 
 export async function createUser(
   req: Request,

@@ -61,6 +61,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use('/api/v1/users', userRouter);
+// app.use(beforeBug);
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/requests', requestRouter);
 app.use('/api/v1/loans', loanRouter);
@@ -107,6 +108,11 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     error: `Cannot ${req.method} ${req.url}. Resource not found.`,
   });
 });
+
+function beforeBug(req: Request, res: Response, n: NextFunction) {
+  console.log('before bug middleware...');
+  n();
+};
 
 /**
  * Server and socket startup

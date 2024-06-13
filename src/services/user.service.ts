@@ -13,11 +13,11 @@ import {
   UserCreateDTO,
   UserQueryDTO,
   UserUpdateDTO,
-  UserDoc,
   UserObj,
   RequestUser,
 } from "@/types";
 import { Types } from "mongoose";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 export async function getUsers(
   queryObj: UserQueryDTO,

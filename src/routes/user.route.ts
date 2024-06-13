@@ -6,6 +6,7 @@ import {
   createUser,
   editUserById,
   deleteUserById,
+  getMe,
 } from "../controllers/user.controller";
 import {
   signupValidator,
@@ -16,8 +17,16 @@ import { AuthenticatedRequest } from "@/types";
 
 const userRouter = Router();
 
+// Get authenticated user
+userRouter.get(
+  '/me',
+  verifyJWT, // authN
+  (req: Request, res: Response, next: NextFunction) => {
+    getMe(req as AuthenticatedRequest, res, next);
+  }
+);
+
 // Get multiple users
-// userRouter.get('/', (req, res) => res.json({ route: 'GET /users' }));
 userRouter.get(
   '/',
   verifyJWT, // authN
@@ -28,7 +37,6 @@ userRouter.get(
 );
 
 // Get one user
-// userRouter.get('/:id', (req, res) => res.json({ route: 'GET /users/:id' }));
 userRouter.get(
   '/:id',
   verifyJWT, // authN
@@ -37,7 +45,6 @@ userRouter.get(
 );
 
 // Create new user
-// userRouter.post('/', (req, res) => res.json({ route: 'POST /users' }));
 userRouter.post(
   '/',
   signupValidator,
@@ -46,7 +53,6 @@ userRouter.post(
 );
 
 // Update a user
-// userRouter.put('/:id', (req, res) => res.json({ route: 'PUT /users/:id' }));
 userRouter.put(
   '/:id',
   verifyJWT, // authN
@@ -55,7 +61,6 @@ userRouter.put(
 );
 
 // Delete a user
-// userRouter.delete('/:id', (req, res) => res.json({ route: 'DELETE /users/:id' }));
 userRouter.delete(
   '/:id',
   verifyJWT, // authN

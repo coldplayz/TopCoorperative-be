@@ -1,19 +1,19 @@
-# Task Management API
+# TopCooperative Backend
 
-A simple task-management demo. Implemented with Clean Architecture in mind.
+The backend for the TopCooperative web application.
 
 ## Setup
 
 Clone the repo:
 
 ```bash
-git clone https://github.com/coldplayz/neyo-task-management.git
+git clone https://github.com/coldplayz/TopCooperative-be.git
 ```
 
 `cd` to the clone repo and install dependencies:
 
 ```bash
-cd neyo-task-management
+cd TopCooperative-be
 npm install
 ```
 
@@ -281,131 +281,5 @@ Status: 201 Created
 
 Returns new access and refresh tokens.
 
-### Create Task (private)
 
-Create a new user task.
-
-```bash
-POST /api/v1/tasks
-```
-
-#### Request Body
-
-| Name          | Type     | Description                         |
-| ------------- | :------- | :---------------------------------- |
-| `description` | `string` | **Required**. Details of the task   |
-
-#### Failure Response
-
-```bash
-Status: 401 Unauthorized
-```
-
-#### Success Response
-
-```bash
-Status: 201 Created
-```
-
-Returns the newly created task object.
-
-### Get Multiple Tasks (private)
-
-Get multiple tasks, filterable by query params and specific to the authenticated user.
-
-```bash
-GET /api/v1/tasks
-```
-
-#### Request Query
-
-| Name        | Type      | Description                       |
-| ----------- | :-------- | :-------------------------------- |
-| `done`      | `boolean` | **Optional**. Task pending state. |
-
-#### Failure Response
-
-```bash
-Status: 401 Unauthorized
-```
-
-#### Success Response
-
-```bash
-Status: 200 OK
-```
-
-Returns task objects meeting the query criteria, or all if no criteria.
-
-### Get Task by ID (public)
-
-Get a specific task using their unique database ID. Public at present for testing purposes.
-
-```bash
-GET /api/v1/tasks/:id
-```
-
-#### Failure Response
-
-```bash
-Status: 404 Not Found | 401 Unauthorized
-```
-
-#### Success Response
-
-```bash
-Status: 200 OK
-```
-
-Returns a specific task object.
-
-### Update a Task by ID (private)
-
-Update a specific user task.
-
-```bash
-PUT /api/v1/tasks/:id
-```
-
-#### Request Body
-
-| Name          | Type      | Description                       |
-| ------------- | :-------- | :-------------------------------- |
-| `done`        | `boolean` | **Optional**. Task pending state. |
-| `description` | `string`  | **Optional**. Task details.       |
-
-#### Failure Response
-
-```bash
-Status: 404 Not Found | 401 Unauthorized
-```
-
-#### Success Response
-
-```bash
-Status: 200 OK
-```
-
-Returns the updated task object.
-
-### Delete Task by ID (private)
-
-Remove a specific task using their unique database ID.
-
-```bash
-DELETE /api/v1/tasks/:id
-```
-
-#### Failure Response
-
-```bash
-Status: 404 Not Found | 401 Unauthorized
-```
-
-#### Success Response
-
-```bash
-Status: 204 No Content
-```
-
-Removes the specific task from the database.
+More docs loading...

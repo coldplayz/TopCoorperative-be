@@ -99,7 +99,7 @@ const dvRequestDataNoUser: RequestCreateDTO[] = [
   },
 ];
 
-const gbLoanNoRequest: LoanCreateDTO[] = [
+const gbLoanNoRequest: (LoanCreateDTO & { hasPaid?: boolean })[] = [
   {
     dueDate,
     requestId: dummyObjectId, // ! replace with actual req ID
@@ -107,6 +107,7 @@ const gbLoanNoRequest: LoanCreateDTO[] = [
   {
     dueDate,
     requestId: dummyObjectId, // ! replace with actual req ID
+    hasPaid: true,
   },
 ];
 

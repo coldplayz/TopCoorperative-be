@@ -51,13 +51,15 @@ export async function getLoans(
     });
     */
     const userLoans = await Loan.find(queryObj)
-      .where('requestId').in(userReqIds);
+      .where('requestId').in(userReqIds)
+      .populate('requestId');
 
     return userLoans;
   }
 
   if (reqUser.permissions.canReadAll) {
-    return Loan.find(queryObj);
+    return Loan.find(queryObj)
+      .populate('requestId');
   }
 
   return [];
